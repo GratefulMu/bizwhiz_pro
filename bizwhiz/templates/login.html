@@ -1,9 +1,9 @@
 {% extends "auth_base.html" %}
-{% block title %}Log In{% endblock %}
-{% block brand_tagline %}Welcome back -- log in to your account{% endblock %}
+{% block title %}Sign In{% endblock %}
+{% block brand_tagline %}Welcome back{% endblock %}
 
 {% block card_content %}
-<h2>Sign in</h2>
+<h2>Sign in to BizWhiz</h2>
 
 <form method="POST" action="{{ url_for('auth.login') }}{% if request.args.get('next') %}?next={{ request.args.get('next') }}{% endif %}">
   <div class="mb-3">
@@ -14,14 +14,15 @@
 
   <div class="mb-3">
     <div class="d-flex justify-content-between align-items-center mb-1">
-      <label class="form-label mb-0" for="password">Password</label>
-      <a href="{{ url_for('auth.forgot_password') }}" style="font-size:.82rem;color:#5c9bff;text-decoration:none;">
+      <label class="form-label" for="password" style="margin-bottom:0;">Password</label>
+      <a href="{{ url_for('auth.forgot_password') }}"
+         style="font-size:.78rem;color:var(--accent);text-decoration:none;">
         Forgot password?
       </a>
     </div>
     <div class="pw-wrap">
       <input type="password" id="password" name="password" class="form-control"
-             placeholder="password" required>
+             placeholder="Password" required>
       <button type="button" class="pw-toggle" onclick="togglePw('password',this)" tabindex="-1">
         <i class="bi bi-eye"></i>
       </button>
@@ -36,7 +37,7 @@
   <button type="submit" class="btn-auth">Sign in</button>
 </form>
 
-<div class="auth-links mt-3">
+<div class="auth-links">
   Don't have an account?
   <a href="{{ url_for('auth.choose_plan') }}">View plans &amp; sign up</a>
 </div>
@@ -51,4 +52,3 @@ function togglePw(fieldId, btn) {
   btn.innerHTML = show ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
 }
 </script>
-{% endblock %}

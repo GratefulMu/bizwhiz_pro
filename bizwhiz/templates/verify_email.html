@@ -3,18 +3,15 @@
 {% block brand_tagline %}Almost there!{% endblock %}
 
 {% block card_content %}
-<h2>Verify your email</h2>
-<p style="color:var(--muted);margin-bottom:1.5rem;line-height:1.6;">
-  We sent a verification link to <strong style="color:#fff;">{{ current_user.email }}</strong>.
-  Click the link in that email to activate your account.
-</p>
-<p style="color:var(--muted);font-size:.875rem;margin-bottom:1.5rem;">
-  Can't find it? Check your spam folder. If it's still not there, click below to resend.
-</p>
-<form method="POST" action="{{ url_for('auth.resend_verification') }}">
-  <button type="submit" class="btn-auth">Resend verification email</button>
-</form>
-<div class="auth-links mt-3">
-  <a href="{{ url_for('auth.logout') }}">Sign out</a>
-</div>
-{% endblock %}
+<div style="text-align:center;padding:.5rem 0 1rem;">
+  <div style="width:52px;height:52px;border-radius:50%;
+              background:rgba(79,123,255,.1);border:1px solid rgba(79,123,255,.25);
+              display:flex;align-items:center;justify-content:center;
+              font-size:1.4rem;color:var(--accent);margin:0 auto 1.25rem;">
+    <i class="bi bi-envelope-check"></i>
+  </div>
+  <h2 style="margin-bottom:.75rem;">Verify your email</h2>
+  <p style="color:var(--muted);line-height:1.65;font-size:.9rem;margin-bottom:.5rem;">
+    We sent a verification link to
+    <strong style="color:var(--text);">{{ current_user.email }}</strong>.
+    Click the link in that email to 

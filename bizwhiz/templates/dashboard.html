@@ -1,72 +1,80 @@
 {% extends "base.html" %}
-{% block title %}Dashboard | BizWhiz{% endblock %}
+{% block title %}Dashboard — BizWhiz{% endblock %}
 {% block page_title %}Dashboard{% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ url_for('leads') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Leads</a>
+<a href="{{ url_for('leads') }}?search_panel=1" class="btn btn-primary btn-sm">
+  <i class="bi bi-plus-lg"></i> Find Leads
+</a>
+{% endblock %}
+
+{% block head %}
+<style>
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: .875rem;
+    margin-bottom: 1.5rem;
+  }
+  .metric-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 1.1rem 1.25rem;
+    display: flex; flex-direction: column; gap: .35rem;
+  }
+  .metric-icon {
+    width: 32px; height: 32px; border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem; margin-bottom: .25rem;
+  }
+  .metric-value { font-size: 1.65rem; font-weight: 800; color: #fff; line-height: 1; }
+  .metric-label { font-size: .75rem; font-weight: 500; color: var(--muted); }
+
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media(max-width: 720px) { .dash-grid { grid-template-columns: 1fr; } }
+
+  .progress-row { margin-bottom: .75rem; }
+  .progress-row:last-child { margin-bottom: 0; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: .78rem; margin-bottom: .3rem; }
+  .progress-track { background: var(--border); border-radius: 4px; height: 5px; overflow: hidden; }
+  .progress-fill  { height: 100%; border-radius: 4px; transition: width .3s; }
+
+  .activity-item {
+    display: flex; gap: .75rem;
+    padding: .6rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-icon {
+    width: 28px; height: 28px; border-radius: var(--r-sm);
+    background: rgba(255,255,255,.05);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; color: var(--muted); flex-shrink: 0; margin-top: .1rem;
+  }
+  .activity-lead { color: #7fa5ff; text-decoration: none; font-size: .85rem; font-weight: 600; }
+  .activity-lead:hover { text-decoration: underline; }
+  .activity-text { font-size: .8rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .activity-time { font-size: .72rem; color: var(--muted); margin-top: .1rem; }
+</style>
 {% endblock %}
 
 {% block content %}
+
 <!-- Metric cards -->
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.75rem;">
-  {% set metric_list = [
-    ('Total Leads',    metrics.total,        'bi-people',          '#0d6efd'),
-    ('Contacted',      metrics.contacted,    'bi-envelope-check',  '#6f42c1'),
-    ('In Progress',    metrics.in_progress,  'bi-hourglass-split', '#fd7e14'),
-    ('Closed Won',     metrics.won,          'bi-trophy',          '#198754'),
-    ('Outreach %',     metrics.outreach_pct|string + '%', 'bi-graph-up', '#0dcaf0'),
-    ('Win Rate',       metrics.win_rate|string + '%',     'bi-bullseye', '#ffc107'),
+<div class="metrics-grid">
+  {% set metrics_list = [
+    ('Total Leads',  metrics.total,       'bi-people',          'var(--accent)', 'rgba(79,123,255,.1)'),
+    ('Contacted',    metrics.contacted,   'bi-envelope-check',  '#a855f7',       'rgba(168,85,247,.1)'),
+    ('In Progress',  metrics.in_progress, 'bi-hourglass-split', '#f97316',       'rgba(249,115,22,.1)'),
+    ('Closed Won',   metrics.won,         'bi-trophy',          '#22c55e',       'rgba(34,197,94,.1)'),
+    ('Outreach %',   metrics.outreach_pct|string + '%', 'bi-graph-up', '#06b6d4', 'rgba(6,182,212,.1)'),
+    ('Win Rate',     metrics.win_rate|string + '%',     'bi-bullseye', '#eab308', 'rgba(234,179,8,.1)'),
   ] %}
-  {% for label, val, icon, color in metric_list %}
-  <div class="card" style="text-align:center;">
-    <i class="bi {{ icon }}" style="font-size:1.5rem;color:{{ color }};margin-bottom:.5rem;display:block;"></i>
-    <div style="font-size:1.6rem;font-weight:800;color:#fff;">{{ val }}</div>
-    <div class="text-muted text-sm">{{ label }}</div>
-  </div>
-  {% endfor %}
-</div>
-
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.75rem;">
-  <!-- Pipeline by stage -->
-  <div class="card">
-    <div style="font-weight:700;color:#fff;margin-bottom:1rem;">Pipeline by Stage</div>
-    {% for s in stages %}
-    {% set cnt = stats.by_stage.get(s, 0) %}
-    {% set total = metrics.total if metrics.total > 0 else 1 %}
-    <div style="margin-bottom:.65rem;">
-      <div class="d-flex justify-content-between text-sm mb-1">
-        <span>{{ s }}</span>
-        <span style="color:#fff;font-weight:600;">{{ cnt }}</span>
-      </div>
-      <div style="background:#2a2d3e;border-radius:4px;height:6px;overflow:hidden;">
-        <div style="height:100%;width:{{ (cnt/total*100)|round }}%;background:{{ s|stage_color }};border-radius:4px;"></div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-
-  <!-- Recent Activity -->
-  <div class="card">
-    <div style="font-weight:700;color:#fff;margin-bottom:1rem;">Recent Activity</div>
-    {% if recent %}
-    <div style="max-height:280px;overflow-y:auto;">
-      {% for act in recent %}
-      <div style="display:flex;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--border);">
-        <i class="bi {{ act.type|activity_icon }}" style="color:var(--muted);margin-top:.15rem;flex-shrink:0;"></i>
-        <div style="min-width:0;">
-          <a href="{{ url_for('lead_detail', lid=act.lead_id) }}"
-             style="color:#5c9bff;text-decoration:none;font-size:.875rem;font-weight:600;">
-            {{ act.lead_name }}
-          </a>
-          <div class="text-sm text-muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ act.content }}</div>
-          <div class="text-sm text-muted">{{ act.created_at[:16] }}</div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    {% else %}
-    <p class="text-muted text-sm">No activity yet. Start by adding some leads!</p>
-    {% endif %}
-  </div>
-</div>
-{% endblock %}
+  {% for label, val, icon, color, bg in metrics_list %}
+  <div class="metric-card">
+    <div class="metric-icon" style="backgroun

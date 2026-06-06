@@ -3,16 +3,22 @@
 {% block brand_tagline %}You're one step away from finding more leads{% endblock %}
 
 {% block card_content %}
+
 {% if plan %}
-<div style="background:rgba(13,110,253,.12);border:1px solid rgba(13,110,253,.3);border-radius:10px;
-            padding:.75rem 1rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;">
+<div style="background:rgba(79,123,255,.08);border:1px solid rgba(79,123,255,.25);
+            border-radius:var(--r);padding:.7rem 1rem;margin-bottom:1.5rem;
+            display:flex;align-items:center;justify-content:space-between;">
   <div>
-    <span style="color:#5c9bff;font-weight:700;font-size:.95rem;">
-      <i class="bi bi-check-circle-fill me-1"></i>{{ plan.name }} plan selected
+    <span style="color:#7fa5ff;font-weight:700;font-size:.9rem;">
+      <i class="bi bi-check-circle-fill"></i> {{ plan.name }} plan selected
     </span>
-    <span style="color:#8890a8;font-size:.85rem;margin-left:.5rem;">${{ plan.price }}/mo &middot; {{ plan.leads }} leads/month</span>
+    <span style="color:var(--muted);font-size:.8rem;margin-left:.5rem;">
+      ${{ plan.price }}/mo &middot; {{ plan.leads }} leads/month
+    </span>
   </div>
-  <a href="{{ url_for('auth.choose_plan') }}" style="font-size:.8rem;color:#8890a8;text-decoration:none;">Change</a>
+  <a href="{{ url_for('auth.choose_plan') }}" style="font-size:.78rem;color:var(--muted);text-decoration:none;">
+    Change
+  </a>
 </div>
 {% endif %}
 
@@ -21,33 +27,33 @@
 <form method="POST" action="{{ url_for('auth.register') }}?plan={{ plan_key }}">
   <input type="hidden" name="plan" value="{{ plan_key }}">
 
-  <div class="row g-3 mb-3">
+  <div class="row mb-3">
     <div class="col-12">
-      <label class="form-label" for="full_name">Full name <span style="color:#dc3545">*</span></label>
+      <label class="form-label" for="full_name">Full name <span style="color:#ef4444;">*</span></label>
       <input type="text" id="full_name" name="full_name" class="form-control"
              value="{{ full_name or '' }}" placeholder="Jane Smith" required autofocus>
     </div>
-
     <div class="col-12">
-      <label class="form-label" for="email">Email address <span style="color:#dc3545">*</span></label>
+      <label class="form-label" for="email">Email address <span style="color:#ef4444;">*</span></label>
       <input type="email" id="email" name="email" class="form-control"
              value="{{ email or '' }}" placeholder="jane@company.com" required>
     </div>
-
     <div class="col-sm-6">
-      <label class="form-label" for="company">Company <span style="color:#555d75;font-size:.8rem;">(optional)</span></label>
+      <label class="form-label" for="company">
+        Company <span style="color:var(--muted);font-size:.75rem;">(optional)</span>
+      </label>
       <input type="text" id="company" name="company" class="form-control"
              value="{{ company or '' }}" placeholder="Acme Corp">
     </div>
-
     <div class="col-sm-6">
-      <label class="form-label" for="phone">Phone <span style="color:#555d75;font-size:.8rem;">(optional)</span></label>
+      <label class="form-label" for="phone">
+        Phone <span style="color:var(--muted);font-size:.75rem;">(optional)</span>
+      </label>
       <input type="tel" id="phone" name="phone" class="form-control"
              value="{{ phone or '' }}" placeholder="+1 555 000 0000">
     </div>
-
     <div class="col-12">
-      <label class="form-label" for="password">Password <span style="color:#dc3545">*</span></label>
+      <label class="form-label" for="password">Password <span style="color:#ef4444;">*</span></label>
       <div class="pw-wrap">
         <input type="password" id="password" name="password" class="form-control"
                placeholder="At least 8 characters" required minlength="8">
@@ -55,13 +61,12 @@
           <i class="bi bi-eye"></i>
         </button>
       </div>
-      <div id="pw-strength" style="height:4px;border-radius:4px;margin-top:6px;background:#2a2d3e;overflow:hidden;">
+      <div style="height:4px;border-radius:4px;margin-top:6px;background:var(--border);overflow:hidden;">
         <div id="pw-bar" style="height:100%;width:0;transition:width .3s,background .3s;border-radius:4px;"></div>
       </div>
     </div>
-
     <div class="col-12">
-      <label class="form-label" for="confirm_password">Confirm password <span style="color:#dc3545">*</span></label>
+      <label class="form-label" for="confirm_password">Confirm password <span style="color:#ef4444;">*</span></label>
       <div class="pw-wrap">
         <input type="password" id="confirm_password" name="confirm_password" class="form-control"
                placeholder="Repeat password" required>
@@ -69,7 +74,7 @@
           <i class="bi bi-eye"></i>
         </button>
       </div>
-      <div id="match-msg" style="font-size:.8rem;margin-top:4px;min-height:1rem;"></div>
+      <div id="match-msg" style="font-size:.78rem;margin-top:4px;min-height:1rem;"></div>
     </div>
   </div>
 
@@ -84,7 +89,7 @@
   <button type="submit" class="btn-auth">Create account &rarr;</button>
 </form>
 
-<div class="auth-links mt-3">
+<div class="auth-links">
   Already have an account?
   <a href="{{ url_for('auth.login') }}">Sign in</a>
 </div>
@@ -109,27 +114,23 @@ const pwBar     = document.getElementById('pw-bar');
 const confInput = document.getElementById('confirm_password');
 const matchMsg  = document.getElementById('match-msg');
 pwInput.addEventListener('input', () => {
-  const v = pwInput.value;
-  let score = 0;
+  const v = pwInput.value; let score = 0;
   if (v.length >= 8)  score++;
   if (v.length >= 12) score++;
   if (/[A-Z]/.test(v)) score++;
   if (/[0-9]/.test(v)) score++;
   if (/[^A-Za-z0-9]/.test(v)) score++;
-  const pct   = Math.min(score / 4 * 100, 100);
-  const color = score <= 1 ? '#dc3545' : score <= 2 ? '#fd7e14' : score <= 3 ? '#ffc107' : '#198754';
-  pwBar.style.width = pct + '%';
-  pwBar.style.background = color;
+  pwBar.style.width = Math.min(score / 4 * 100, 100) + '%';
+  pwBar.style.background = score <= 1 ? '#ef4444' : score <= 2 ? '#f97316' : score <= 3 ? '#eab308' : '#22c55e';
   checkMatch();
 });
 confInput.addEventListener('input', checkMatch);
 function checkMatch() {
   if (!confInput.value) { matchMsg.textContent = ''; return; }
   if (confInput.value === pwInput.value) {
-    matchMsg.style.color = '#a3d9a5'; matchMsg.textContent = 'Passwords match';
+    matchMsg.style.color = '#86efac'; matchMsg.textContent = 'Passwords match';
   } else {
-    matchMsg.style.color = '#f4b8be'; matchMsg.textContent = 'Passwords do not match';
+    matchMsg.style.color = '#fca5a5'; matchMsg.textContent = 'Passwords do not match';
   }
 }
-</script>
-{% endblock %}
+</sc

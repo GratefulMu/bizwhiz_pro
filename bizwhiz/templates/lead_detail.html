@@ -1,27 +1,73 @@
 {% extends "base.html" %}
-{% block title %}{{ lead.name }} | BizWhiz{% endblock %}
+{% block title %}{{ lead.name }} — BizWhiz{% endblock %}
 {% block page_title %}{{ lead.name }}{% endblock %}
 
 {% block topbar_actions %}
-<div class="d-flex gap-2">
-  <a href="{{ url_for('leads') }}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back</a>
-  <form method="POST" action="{{ url_for('delete_lead_route', lid=lead.id) }}"
-        onsubmit="return confirm('Delete this lead?')">
-    <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button>
-  </form>
-</div>
+<a href="{{ url_for('leads') }}" class="btn btn-secondary btn-sm">
+  <i class="bi bi-arrow-left"></i> Back
+</a>
+<form method="POST" action="{{ url_for('delete_lead_route', lid=lead.id) }}"
+      onsubmit="return confirm('Delete this lead?')" style="display:inline;">
+  <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button>
+</form>
+{% endblock %}
+
+{% block head %}
+<style>
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 1rem; align-items: start;
+  }
+  @media(max-width: 800px) { .detail-grid { grid-template-columns: 1fr; } }
+
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+  }
+  .fields-grid .full { grid-column: 1 / -1; }
+
+  .activity-item {
+    display: flex; gap: .65rem;
+    padding: .6rem 0; border-bottom: 1px solid var(--border);
+  }
+  .activity-item:last-of-type { border-bottom: none; }
+  .act-icon {
+    width: 26px; height: 26px; border-radius: var(--r-sm);
+    background: rgba(255,255,255,.04);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; color: var(--muted); flex-shrink: 0; margin-top: .1rem;
+  }
+
+  .stage-btn {
+    display: flex; align-items: center; gap: .5rem;
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border-lt);
+    border-radius: var(--r-sm);
+    padding: .45rem .75rem;
+    color: var(--muted); cursor: pointer;
+    font-size: .84rem; font-weight: 500; font-family: inherit;
+    text-align: left; width: 100%;
+    transition: all .15s;
+  }
+  .stage-btn:hover { background: rgba(255,255,255,.08); color: var(--text); }
+  .stage-btn.active { color: #fff; border-color: transparent; }
+  .stage-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+</style>
 {% endblock %}
 
 {% block content %}
-<div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;">
+<div class="detail-grid">
 
-  <!-- Left: details + activity -->
-  <div>
-    <!-- Edit form -->
-    <div class="card mb-3">
-      <div style="font-weight:700;color:#fff;margin-bottom:1rem;">Lead Information</div>
+  <!-- Left column -->
+  <div style="display:flex;flex-direction:column;gap:1rem;">
+
+    <!-- Lead info -->
+    <div class="card">
+      <div class="card-title"><i class="bi bi-building"></i> Lead Information</div>
       <form method="POST" action="{{ url_for('update_lead_route', lid=lead.id) }}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+        <div class="fields-grid">
           <div>
             <label class="form-label">Business Name</label>
             <input type="text" name="name" value="{{ lead.name }}" class="form-control" required>
@@ -46,27 +92,29 @@
             <label class="form-label">ZIP Code</label>
             <input type="text" name="zip_code" value="{{ lead.zip_code }}" class="form-control">
           </div>
-          <div style="grid-column:1/-1;">
+          <div class="full">
             <label class="form-label">Address</label>
             <input type="text" name="address" value="{{ lead.address }}" class="form-control">
           </div>
         </div>
         <div style="margin-top:1rem;">
-          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="bi bi-check-lg"></i> Save Changes
+          </button>
         </div>
       </form>
     </div>
 
     <!-- Activity feed -->
     <div class="card">
-      <div style="font-weight:700;color:#fff;margin-bottom:1rem;">Activity</div>
+      <div class="card-title"><i class="bi bi-clock-history"></i> Activity</div>
       {% if activities %}
         {% for act in activities %}
-        <div style="display:flex;gap:.75rem;padding:.65rem 0;border-bottom:1px solid var(--border);">
-          <i class="bi {{ act.type|activity_icon }}" style="color:var(--muted);margin-top:.1rem;flex-shrink:0;"></i>
+        <div class="activity-item">
+          <div class="act-icon"><i class="bi {{ act.type|activity_icon }}"></i></div>
           <div>
-            <div style="font-size:.875rem;">{{ act.content }}</div>
-            <div class="text-muted text-sm">{{ act.created_at[:16] }}</div>
+            <div style="font-size:.85rem;">{{ act.content }}</div>
+            <div class="text-muted text-xs">{{ act.created_at[:16] }}</div>
           </div>
         </div>
         {% endfor %}
@@ -74,31 +122,32 @@
         <p class="text-muted text-sm">No activity yet.</p>
       {% endif %}
 
-      <!-- Add note -->
       <div style="margin-top:1rem;">
         <label class="form-label">Add Note</label>
-        <div style="display:flex;gap:.5rem;">
-          <input type="text" id="noteInput" class="form-control" placeholder="Write a note...">
-          <button class="btn btn-secondary" onclick="addNote()"><i class="bi bi-plus"></i></button>
+        <div class="d-flex gap-2">
+          <input type="text" id="noteInput" class="form-control" placeholder="Write a note…">
+          <button class="btn btn-secondary btn-sm" onclick="addNote()">
+            <i class="bi bi-plus"></i>
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Right: stage + email -->
-  <div>
-    <!-- Stage -->
-    <div class="card mb-3">
-      <div style="font-weight:700;color:#fff;margin-bottom:.75rem;">Stage</div>
-      <div style="display:flex;flex-direction:column;gap:.4rem;">
+  <!-- Right column -->
+  <div style="display:flex;flex-direction:column;gap:1rem;">
+
+    <!-- Stage selector -->
+    <div class="card">
+      <div class="card-title"><i class="bi bi-funnel"></i> Pipeline Stage</div>
+      <div style="display:flex;flex-direction:column;gap:.35rem;">
         {% for s in stages %}
         <button onclick="setStage('{{ s }}')"
-          style="background:{% if lead.stage == s %}{{ s|stage_color }}{% else %}rgba(255,255,255,.05){% endif %};
-                 border:1px solid {% if lead.stage == s %}{{ s|stage_color }}{% else %}var(--border){% endif %};
-                 border-radius:8px;padding:.4rem .75rem;color:#fff;cursor:pointer;text-align:left;
-                 font-size:.875rem;transition:all .2s;"
-          id="stage-btn-{{ loop.index }}">
+                class="stage-btn {% if lead.stage == s %}active{% endif %}"
+                {% if lead.stage == s %}style="background:{{ s|stage_color }}20;border-color:{{ s|stage_color }}40;"{% endif %}>
+          <span class="stage-dot" style="background:{{ s|stage_color }};"></span>
           {{ s }}
+          {% if lead.stage == s %}<i class="bi bi-check-lg ms-auto" style="color:{{ s|stage_color }};font-size:.8rem;"></i>{% endif %}
         </button>
         {% endfor %}
       </div>
@@ -106,12 +155,12 @@
 
     <!-- Send email -->
     <div class="card">
-      <div style="font-weight:700;color:#fff;margin-bottom:.75rem;">Send Email</div>
+      <div class="card-title"><i class="bi bi-send"></i> Send Email</div>
       {% if templates %}
-      <div class="mb-2">
+      <div class="mb-3">
         <label class="form-label">Load Template</label>
         <select class="form-select" onchange="loadTemplate(this.value)">
-          <option value="">-- choose template --</option>
+          <option value="">— choose template —</option>
           {% for t in templates %}
           <option value="{{ t.id }}">{{ t.name }}</option>
           {% endfor %}
@@ -128,17 +177,17 @@
         <label class="form-label">Subject</label>
         <input type="text" id="emailSubject" class="form-control" placeholder="Email subject">
       </div>
-      <div class="mb-2">
+      <div class="mb-3">
         <label class="form-label">Body</label>
-        <textarea id="emailBody" class="form-control" rows="5" placeholder="Email body..."></textarea>
+        <textarea id="emailBody" class="form-control" rows="5" placeholder="Email body…"></textarea>
       </div>
       <button class="btn btn-primary w-100" onclick="sendEmail()">
         <i class="bi bi-send"></i> Send Email
       </button>
-      <div id="emailStatus" style="font-size:.8rem;margin-top:.5rem;min-height:1rem;"></div>
+      <div id="emailStatus" style="font-size:.78rem;margin-top:.5rem;min-height:1rem;"></div>
     </div>
-  </div>
 
+  </div>
 </div>
 {% endblock %}
 
@@ -146,54 +195,14 @@
 <script>
 function setStage(stage) {
   fetch('{{ url_for("update_stage", lid=lead.id) }}', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
+    method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({stage})
-  }).then(r => r.json()).then(d => {
-    if (d.ok) location.reload();
-  });
+  }).then(r => r.json()).then(d => { if (d.ok) location.reload(); });
 }
-
 function addNote() {
   const input = document.getElementById('noteInput');
   const content = input.value.trim();
   if (!content) return;
   fetch('{{ url_for("add_note", lid=lead.id) }}', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({content})
-  }).then(r => r.json()).then(d => {
-    if (d.ok) { input.value = ''; location.reload(); }
-  });
-}
-
-function loadTemplate(tid) {
-  if (!tid) return;
-  fetch('/templates/' + tid).then(r => r.json()).then(t => {
-    document.getElementById('emailSubject').value = t.subject || '';
-    document.getElementById('emailBody').value = t.body || '';
-  });
-}
-
-function sendEmail() {
-  const to      = document.getElementById('emailTo').value.trim();
-  const subject = document.getElementById('emailSubject').value.trim();
-  const body    = document.getElementById('emailBody').value.trim();
-  const status  = document.getElementById('emailStatus');
-  if (!to) { status.style.color='#f4b8be'; status.textContent='Recipient email required.'; return; }
-  status.style.color='var(--muted)'; status.textContent='Sending...';
-  fetch('{{ url_for("send_lead_email", lid=lead.id) }}', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({to_email: to, subject, body})
-  }).then(r => r.json()).then(d => {
-    if (d.ok) {
-      status.style.color='#a3d9a5'; status.textContent='Email sent!';
-      setTimeout(() => location.reload(), 1000);
-    } else {
-      status.style.color='#f4b8be'; status.textContent='Error: ' + d.error;
-    }
-  });
-}
-</script>
-{% endblock %}
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify
