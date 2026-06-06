@@ -1,0 +1,20 @@
+{% extends "auth_base.html" %}
+{% block title %}Verify Email{% endblock %}
+{% block brand_tagline %}Almost there!{% endblock %}
+
+{% block card_content %}
+<h2>Verify your email</h2>
+<p style="color:var(--muted);margin-bottom:1.5rem;line-height:1.6;">
+  We sent a verification link to <strong style="color:#fff;">{{ current_user.email }}</strong>.
+  Click the link in that email to activate your account.
+</p>
+<p style="color:var(--muted);font-size:.875rem;margin-bottom:1.5rem;">
+  Can't find it? Check your spam folder. If it's still not there, click below to resend.
+</p>
+<form method="POST" action="{{ url_for('auth.resend_verification') }}">
+  <button type="submit" class="btn-auth">Resend verification email</button>
+</form>
+<div class="auth-links mt-3">
+  <a href="{{ url_for('auth.logout') }}">Sign out</a>
+</div>
+{% endblock %}

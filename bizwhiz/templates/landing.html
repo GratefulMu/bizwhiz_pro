@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BizWhiz -- Find Local Business Leads</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    :root {
+      --dark:#12141d; --darker:#0d0f17; --card-bg:#1a1d2e;
+      --border:#2a2d3e; --text:#c8cde0; --muted:#8890a8;
+      --blue:#0d6efd; --blue-glow:rgba(13,110,253,.25);
+    }
+    html { scroll-behavior:smooth; }
+    body { background:var(--darker); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; }
+    a { text-decoration:none; }
+
+    /* Nav */
+    nav {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1rem 2.5rem; border-bottom:1px solid var(--border);
+      position:sticky; top:0; background:rgba(13,15,23,.95);
+      backdrop-filter:blur(8px); z-index:100;
+    }
+    .brand { font-size:1.4rem; font-weight:800; color:#fff; }
+    .brand span { color:var(--blue); }
+    .nav-links { display:flex; gap:2rem; align-items:center; }
+    .nav-link { color:var(--muted); font-size:.9rem; transition:color .2s; }
+    .nav-link:hover { color:#fff; }
+    .btn-nav {
+      background:var(--blue); color:#fff; padding:.4rem 1.1rem;
+      border-radius:8px; font-size:.9rem; font-weight:600; transition:background .2s;
+    }
+    .btn-nav:hover { background:#0b5ed7; }
+
+    /* Hero */
+    .hero {
+      text-align:center; padding:6rem 1.5rem 5rem;
+      background:radial-gradient(ellipse 80% 60% at 50% -10%, rgba(13,110,253,.18), transparent);
+    }
+    .hero-badge {
+      display:inline-block; background:rgba(13,110,253,.15); border:1px solid rgba(13,110,253,.3);
+      color:#5c9bff; border-radius:20px; padding:.3rem .9rem; font-size:.8rem;
+      font-weight:600; margin-bottom:1.5rem;
+    }
+    .hero h1 {
+      font-size:clamp(2rem,5vw,3.5rem); font-weight:800; color:#fff;
+      line-height:1.15; margin-bottom:1.25rem; max-width:700px; margin-inline:auto;
+    }
+    .hero h1 .accent { color:var(--blue); }
+    .hero p {
+      color:var(--muted); font-size:1.1rem; max-width:520px;
+      margin:0 auto 2.5rem; line-height:1.7;
+    }
+    .hero-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+    .btn-hero-primary {
+      background:var(--blue); color:#fff; padding:.75rem 2rem;
+      border-radius:10px; font-size:1rem; font-weight:700; transition:all .2s;
+      box-shadow:0 4px 20px var(--blue-glow);
+    }
+    .btn-hero-primary:hover { background:#0b5ed7; transform:translateY(-1px); }
+    .btn-hero-secondary {
+      background:rgba(255,255,255,.07); color:var(--text); padding:.75rem 2rem;
+      border-radius:10px; font-size:1rem; font-weight:600; border:1px solid var(--border);
+      transition:all .2s;
+    }
+    .btn-hero-secondary:hover { background:rgba(255,255,255,.12); }
+
+    /* Sections */
+    section { padding:5rem 1.5rem; }
+    .section-label {
+      text-align:center; color:var(--blue); font-size:.85rem; font-weight:700;
+      letter-spacing:.1em; text-transform:uppercase; margin-bottom:.75rem;
+    }
+    .section-title {
+      text-align:center; font-size:clamp(1.5rem,3vw,2.25rem); font-weight:800;
+      color:#fff; margin-bottom:.75rem;
+    }
+    .section-sub {
+      text-align:center; color:var(--muted); max-width:520px;
+      margin:0 auto 3rem; line-height:1.7;
+    }
+    .container { max-width:1100px; margin:0 auto; }
+
+    /* Features */
+    .features-grid {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:1.25rem;
+    }
+    .feature-card {
+      background:var(--card-bg); border:1px solid var(--border); border-radius:14px;
+      padding:1.5rem;
+    }
+    .feature-icon {
+      width:44px; height:44px; border-radius:10px; display:flex; align-items:center;
+      justify-content:center; font-size:1.25rem; margin-bottom:1rem;
+    }
+    .feature-card h3 { color:#fff; font-size:1rem; font-weight:700; margin-bottom:.4rem; }
+    .feature-card p { color:var(--muted); font-size:.875rem; line-height:1.6; }
+
+    /* How it works */
+    .steps { display:flex; gap:2rem; justify-content:center; flex-wrap:wrap; }
+    .step { text-align:center; max-width:220px; }
+    .step-num {
+      width:48px; height:48px; border-radius:50%; background:rgba(13,110,253,.15);
+      border:1px solid rgba(13,110,253,.3); color:var(--blue); font-size:1.2rem;
+      font-weight:800; display:flex; align-items:center; justify-content:center;
+      margin:0 auto 1rem;
+    }
+    .step h3 { color:#fff; font-size:.95rem; font-weight:700; margin-bottom:.4rem; }
+    .step p { color:var(--muted); font-size:.85rem; line-height:1.6; }
+
+    /* Pricing */
+    .pricing-grid {
+      display:flex; gap:1.5rem; justify-content:center; flex-wrap:wrap;
+    }
+    .price-card {
+      background:var(--card-bg); border:1px solid var(--border); border-radius:16px;
+      padding:2rem; width:280px; position:relative;
+    }
+    .price-card.featured {
+      border-color:var(--blue); box-shadow:0 0 0 1px var(--blue),0 8px 40px var(--blue-glow);
+    }
+    .price-badge {
+      position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+      background:var(--blue); color:#fff; font-size:.75rem; font-weight:700;
+      padding:.25rem .85rem; border-radius:20px;
+    }
+    .price-name { font-size:.9rem; font-weight:600; color:var(--muted); margin-bottom:.5rem; }
+    .price-amount { font-size:2.5rem; font-weight:800; color:#fff; }
+    .price-amount span { font-size:1rem; color:var(--muted); font-weight:400; }
+    .price-desc { color:var(--muted); font-size:.85rem; margin:.5rem 0 1.25rem; }
+    .price-features { list-style:none; margin-bottom:1.75rem; }
+    .price-features li {
+      color:var(--muted); font-size:.875rem; padding:.3rem 0;
+      display:flex; align-items:center; gap:.5rem;
+    }
+    .price-features li i { color:#198754; flex-shrink:0; }
+    .btn-price {
+      display:block; text-align:center; padding:.65rem; border-radius:8px;
+      font-weight:600; font-size:.95rem; transition:all .2s;
+    }
+    .btn-price-primary { background:var(--blue); color:#fff; }
+    .btn-price-primary:hover { background:#0b5ed7; }
+    .btn-price-outline { background:transparent; color:var(--text); border:1px solid var(--border); }
+    .btn-price-outline:hover { border-color:#fff; color:#fff; }
+
+    /* CTA */
+    .cta-section {
+      background:linear-gradient(135deg, rgba(13,110,253,.15), rgba(111,66,193,.1));
+      border:1px solid rgba(13,110,253,.2); border-radius:20px;
+      padding:4rem 2rem; text-align:center; max-width:700px; margin:0 auto;
+    }
+    .cta-section h2 { font-size:2rem; font-weight:800; color:#fff; margin-bottom:.75rem; }
+    .cta-section p { color:var(--muted); margin-bottom:2rem; font-size:1rem; }
+
+    /* Footer */
+    footer {
+      border-top:1px solid var(--border); padding:2rem 2.5rem;
+      display:flex; justify-content:space-between; align-items:center;
+      flex-wrap:wrap; gap:1rem;
+    }
+    footer .brand { font-size:1.1rem; }
+    footer p { color:var(--muted); font-size:.85rem; }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="brand">Biz<span>Whiz</span></div>
+  <div class="nav-links">
+    <a href="#features" class="nav-link">Features</a>
+    <a href="#how-it-works" class="nav-link">How It Works</a>
+    <a href="#pricing" class="nav-link">Pricing</a>
+    <a href="{{ url_for('auth.login') }}" class="nav-link">Sign In</a>
+    <a href="{{ url_for('auth.choose_plan') }}" class="btn-nav">Get Started</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge"><i class="bi bi-lightning-charge-fill"></i> Powered by OpenStreetMap</div>
+  <h1>Find Local Business Leads <span class="accent">Automatically</span></h1>
+  <p>BizWhiz searches your area for businesses, scrapes their contact info, and drops them straight into your CRM. Zero manual work.</p>
+  <div class="hero-btns">
+    <a href="{{ url_for('auth.choose_plan') }}" class="btn-hero-primary">Get Started Free &rarr;</a>
+    <a href="#how-it-works" class="btn-hero-secondary">See How It Works</a>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features" style="background:var(--dark);">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <div class="section-title">Everything you need to fill your pipeline</div>
+    <div class="section-sub">From finding leads to closing deals, BizWhiz handles the whole workflow.</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(13,110,253,.15);color:#5c9bff;">
+          <i class="bi bi-geo-alt-fill"></i>
+        </div>
+        <h3>Local Business Search</h3>
+        <p>Enter any ZIP code and business type. BizWhiz finds every matching business within your chosen radius using OpenStreetMap data.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(25,135,84,.15);color:#5cb85c;">
+          <i class="bi bi-envelope-fill"></i>
+        </div>
+        <h3>Automatic Email Scraping</h3>
+        <p>BizWhiz visits each business website and extracts real contact emails automatically -- no copy-pasting required.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(111,66,193,.15);color:#a78bfa;">
+          <i class="bi bi-kanban-fill"></i>
+        </div>
+        <h3>Built-in CRM Pipeline</h3>
+        <p>Track every lead through New, Contacted, Proposal Sent, Negotiating, and Closed stages with a visual pipeline board.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(253,126,20,.15);color:#fd7e14;">
+          <i class="bi bi-send-fill"></i>
+        </div>
+        <h3>Email Outreach</h3>
+        <p>Send personalized emails directly from BizWhiz using your own SMTP. Save templates and track what you've sent.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(13,202,240,.15);color:#0dcaf0;">
+          <i class="bi bi-file-earmark-arrow-down-fill"></i>
+        </div>
+        <h3>CSV Import &amp; Export</h3>
+        <p>Import your existing lead lists or export everything to CSV for use in other tools. Full flexibility with your data.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(255,193,7,.15);color:#ffc107;">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <h3>Dashboard Analytics</h3>
+        <p>See your outreach rate, win rate, pipeline breakdown, and recent activity at a glance from your dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="section-label">How It Works</div>
+    <div class="section-title">From ZIP code to qualified lead in minutes</div>
+    <div class="section-sub">No technical knowledge required. Just tell BizWhiz what you're looking for.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Enter your target</h3>
+        <p>Type in a business category and ZIP code. Set your search radius.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>BizWhiz searches</h3>
+        <p>We scan OpenStreetMap and scrape contact details from each business website automatically.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Leads appear in your CRM</h3>
+        <p>Every business shows up in your leads list with name, address, phone, and email ready to go.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h3>Reach out and close</h3>
+        <p>Send emails, track stages, add notes, and move deals through your pipeline to closed-won.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" style="background:var(--dark);">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <div class="section-title">Simple, transparent pricing</div>
+    <div class="section-sub">All plans include the full feature set. Pick the size that fits your business.</div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Solo</div>
+        <div class="price-amount">$29<span>/mo</span></div>
+        <div class="price-desc">Perfect for solo operators and freelancers.</div>
+        <ul class="price-features">
+          <li><i class="bi bi-check-lg"></i> 500 leads/month</li>
+          <li><i class="bi bi-check-lg"></i> 1 seat</li>
+          <li><i class="bi bi-check-lg"></i> Email outreach</li>
+          <li><i class="bi bi-check-lg"></i> CSV import &amp; export</li>
+          <li><i class="bi bi-check-lg"></i> Full CRM pipeline</li>
+        </ul>
+        <a href="{{ url_for('auth.register', plan='solo') }}" class="btn-price btn-price-outline">Start Free Trial</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">Most Popular</div>
+        <div class="price-name">Pro</div>
+        <div class="price-amount">$79<span>/mo</span></div>
+        <div class="price-desc">For growing agencies and small teams.</div>
+        <ul class="price-features">
+          <li><i class="bi bi-check-lg"></i> 2,500 leads/month</li>
+          <li><i class="bi bi-check-lg"></i> Up to 5 seats</li>
+          <li><i class="bi bi-check-lg"></i> Email outreach</li>
+          <li><i class="bi bi-check-lg"></i> CSV import &amp; export</li>
+          <li><i class="bi bi-check-lg"></i> Full CRM pipeline</li>
+        </ul>
+        <a href="{{ url_for('auth.register', plan='pro') }}" class="btn-price btn-price-primary">Start Free Trial</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Agency</div>
+        <div class="price-amount">$149<span>/mo</span></div>
+        <div class="price-desc">For established agencies with high volume needs.</div>
+        <ul class="price-features">
+          <li><i class="bi bi-check-lg"></i> 10,000 leads/month</li>
+          <li><i class="bi bi-check-lg"></i> Up to 20 seats</li>
+          <li><i class="bi bi-check-lg"></i> Email outreach</li>
+          <li><i class="bi bi-check-lg"></i> CSV import &amp; export</li>
+          <li><i class="bi bi-check-lg"></i> Full CRM pipeline</li>
+        </ul>
+        <a href="{{ url_for('auth.register', plan='agency') }}" class="btn-price btn-price-outline">Start Free Trial</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section>
+  <div class="container">
+    <div class="cta-section">
+      <h2>Ready to fill your pipeline?</h2>
+      <p>Join hundreds of businesses using BizWhiz to find and close local leads every day.</p>
+      <a href="{{ url_for('auth.choose_plan') }}" class="btn-hero-primary">Get Started Free &rarr;</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="brand">Biz<span style="color:var(--blue);">Whiz</span></div>
+  <p>&copy; 2025 BizWhiz. All rights reserved.</p>
+  <div style="display:flex;gap:1.5rem;">
+    <a href="{{ url_for('auth.login') }}" style="color:var(--muted);font-size:.85rem;">Sign In</a>
+    <a href="{{ url_for('auth.choose_plan') }}" style="color:var(--muted);font-size:.85rem;">Sign Up</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | BizWhiz{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('leads') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Leads</a>
+{% endblock %}
+
+{% block content %}
+<!-- Metric cards -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.75rem;">
+  {% set metric_list = [
+    ('Total Leads',    metrics.total,        'bi-people',          '#0d6efd'),
+    ('Contacted',      metrics.contacted,    'bi-envelope-check',  '#6f42c1'),
+    ('In Progress',    metrics.in_progress,  'bi-hourglass-split', '#fd7e14'),
+    ('Closed Won',     metrics.won,          'bi-trophy',          '#198754'),
+    ('Outreach %',     metrics.outreach_pct|string + '%', 'bi-graph-up', '#0dcaf0'),
+    ('Win Rate',       metrics.win_rate|string + '%',     'bi-bullseye', '#ffc107'),
+  ] %}
+  {% for label, val, icon, color in metric_list %}
+  <div class="card" style="text-align:center;">
+    <i class="bi {{ icon }}" style="font-size:1.5rem;color:{{ color }};margin-bottom:.5rem;display:block;"></i>
+    <div style="font-size:1.6rem;font-weight:800;color:#fff;">{{ val }}</div>
+    <div class="text-muted text-sm">{{ label }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.75rem;">
+  <!-- Pipeline by stage -->
+  <div class="card">
+    <div style="font-weight:700;color:#fff;margin-bottom:1rem;">Pipeline by Stage</div>
+    {% for s in stages %}
+    {% set cnt = stats.by_stage.get(s, 0) %}
+    {% set total = metrics.total if metrics.total > 0 else 1 %}
+    <div style="margin-bottom:.65rem;">
+      <div class="d-flex justify-content-between text-sm mb-1">
+        <span>{{ s }}</span>
+        <span style="color:#fff;font-weight:600;">{{ cnt }}</span>
+      </div>
+      <div style="background:#2a2d3e;border-radius:4px;height:6px;overflow:hidden;">
+        <div style="height:100%;width:{{ (cnt/total*100)|round }}%;background:{{ s|stage_color }};border-radius:4px;"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="card">
+    <div style="font-weight:700;color:#fff;margin-bottom:1rem;">Recent Activity</div>
+    {% if recent %}
+    <div style="max-height:280px;overflow-y:auto;">
+      {% for act in recent %}
+      <div style="display:flex;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--border);">
+        <i class="bi {{ act.type|activity_icon }}" style="color:var(--muted);margin-top:.15rem;flex-shrink:0;"></i>
+        <div style="min-width:0;">
+          <a href="{{ url_for('lead_detail', lid=act.lead_id) }}"
+             style="color:#5c9bff;text-decoration:none;font-size:.875rem;font-weight:600;">
+            {{ act.lead_name }}
+          </a>
+          <div class="text-sm text-muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ act.content }}</div>
+          <div class="text-sm text-muted">{{ act.created_at[:16] }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted text-sm">No activity yet. Start by adding some leads!</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
