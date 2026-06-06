@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}BizWhiz{% endblock %} — BizWhiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #0c0e14;
+      --surface:   #12151f;
+      --card:      #181c28;
+      --border:    #232639;
+      --border-lt: #2d3148;
+      --text:      #d4d8eb;
+      --muted:     #7a8099;
+      --accent:    #4f7bff;
+      --accent-dk: #3d69f5;
+      --r-sm: 6px; --r: 10px; --r-lg: 14px; --r-xl: 18px;
+    }
+    html { font-size: 15px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem 1rem;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+    .auth-brand { text-align: center; margin-bottom: 1.75rem; }
+    .brand-logo {
+      display: inline-flex; align-items: center; gap: .6rem;
+      text-decoration: none; margin-bottom: .4rem;
+    }
+    .brand-icon {
+      width: 32px; height: 32px;
+      background: var(--accent); border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 800; color: #fff; letter-spacing: -.5px;
+    }
+    .brand-wordmark { font-size: 1.05rem; font-weight: 800; color: #fff; letter-spacing: -.3px; }
+    .brand-wordmark em { color: var(--accent); font-style: normal; }
+    .brand-tagline { color: var(--muted); font-size: .84rem; margin-top: .3rem; }
+
+    .auth-card {
+      background: var(--card);
+      border: 1px solid var(--border-lt);
+      border-radius: var(--r-xl);
+      padding: 2rem;
+      width: 100%; max-width: 440px;
+      box-shadow: 0 16px 48px rgba(0,0,0,.4);
+    }
+    .auth-card h2 { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 1.5rem; }
+
+    .form-label { font-size: .78rem; font-weight: 600; color: var(--muted); margin-bottom: .3rem; display: block; }
+    .form-control {
+      width: 100%; background: var(--bg);
+      border: 1px solid var(--border-lt); border-radius: var(--r-sm);
+      color: var(--text); padding: .55rem .85rem;
+      font-size: .9rem; font-family: inherit; outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,123,255,.15); }
+    .form-control::placeholder { color: #3a3f5c; }
+
+    .form-check { display: flex; align-items: center; gap: .5rem; }
+    .form-check-input {
+      width: 15px; height: 15px; background: var(--bg);
+      border: 1px solid var(--border-lt); border-radius: 4px;
+      cursor: pointer; accent-color: var(--accent); flex-shrink: 0;
+    }
+    .form-check-label { font-size: .84rem; color: var(--muted); cursor: pointer; }
+    .form-check-label a { color: var(--accent); text-decoration: none; }
+    .form-check-label a:hover { text-decoration: underline; }
+
+    .btn-auth {
+      width: 100%; background: var(--accent); color: #fff;
+      border: none; border-radius: var(--r-sm); padding: .65rem;
+      font-size: .95rem; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: background .15s; margin-top: .5rem;
+    }
+    .btn-auth:hover { background: var(--accent-dk); }
+
+    .pw-wrap { position: relative; }
+    .pw-toggle {
+      position: absolute; right: .75rem; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--muted); cursor: pointer; padding: 0; font-size: .95rem;
+      transition: color .15s;
+    }
+    .pw-toggle:hover { color: var(--text); }
+
+    .auth-links { text-align: center; font-size: .84rem; color: var(--muted); margin-top: 1rem; }
+    .auth-links a { color: var(--accent); text-decoration: none; }
+    .auth-links a:hover { text-decoration: underline; }
+    .auth-footer { text-align: center; margin-top: 1rem; font-size: .82rem; }
+    .auth-footer a { color: var(--muted); text-decoration: none; }
+    .auth-footer a:hover { color: var(--text); }
+
+    .alert { border-radius: var(--r); padding: .6rem 1rem; margin-bottom: .875rem; font-size: .85rem; }
+    .alert-danger  { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.25);  color: #fca5a5; }
+    .alert-success { background: rgba(34,197,94,.1);  border: 1px solid rgba(34,197,94,.25);  color: #86efac; }
+    .alert-warning { background: rgba(234,179,8,.1);  border: 1px solid rgba(234,179,8,.25);  color: #fde047; }
+    .alert-info    { background: rgba(6,182,212,.1);  border: 1px solid rgba(6,182,212,.25);  color: #67e8f9; }
+
+    .mb-1 { margin-bottom: .25rem; }
+    .mb-2 { margin-bottom: .5rem; }
+    .mb-3 { margin-bottom: 1rem; }
+    .mt-1 { margin-top: .25rem; }
+    .mt-3 { margin-top: 1rem; }
+    .d-flex { displa

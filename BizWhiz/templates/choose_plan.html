@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Choose a Plan — BizWhiz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0c0e14; --surface: #12151f; --card: #181c28;
+      --border: #232639; --border-lt: #2d3148;
+      --text: #d4d8eb; --muted: #7a8099;
+      --accent: #4f7bff; --accent-dk: #3d69f5;
+      --r-sm: 6px; --r: 10px; --r-xl: 18px;
+    }
+    html { font-size: 15px; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased; line-height: 1.5;
+    }
+    a { text-decoration: none; }
+
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .875rem 1.75rem; border-bottom: 1px solid var(--border);
+    }
+    .nav-brand { display: flex; align-items: center; gap: .55rem; }
+    .brand-icon {
+      width: 30px; height: 30px; background: var(--accent);
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .68rem; font-weight: 800; color: #fff;
+    }
+    .brand-name { font-size: 1rem; font-weight: 800; color: #fff; letter-spacing: -.3px; }
+    .brand-name em { color: var(--accent); font-style: normal; }
+    .nav-link { color: var(--muted); font-size: .875rem; font-weight: 500; transition: color .15s; }
+    .nav-link:hover { color: var(--text); }
+
+    .page-header { text-align: center; padding: 3.5rem 1rem 2.5rem; }
+    .page-header h1 { font-size: 1.85rem; font-weight: 800; color: #fff; letter-spacing: -.3px; margin-bottom: .5rem; }
+    .page-header p  { color: var(--muted); font-size: .95rem; }
+
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem; max-width: 900px;
+      margin: 0 auto; padding: 0 1.5rem 5rem;
+    }
+    .plan-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--r-xl); padding: 2rem;
+      display: flex; flex-direction: column; position: relative;
+      transition: border-color .2s;
+    }
+    .plan-card:hover { border-color: var(--border-lt); }
+    .plan-card.featured {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent), 0 8px 40px rgba(79,123,255,.18);
+    }
+    .plan-badge {
+      position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: #fff;
+      font-size: .72rem; font-weight: 700;
+      padding: .2rem .8rem; border-radius: 20px; white-space: nowrap;
+    }
+    .plan-name { font-size: .85rem; font-weight: 600; color: var(--muted); margin-bottom: .5rem; }
+    .plan-price { font-size: 2.25rem; font-weight: 800; color: #fff; line-height: 1; margin: .5rem 0 .25rem; }
+    .plan-price span { font-size: .9rem; color: var(--muted); font-weight: 400; }
+    .plan-features { list-style: none; margin: 1.25rem 0 2rem; flex: 1; }
+    .plan-features li {
+      color: var(--muted); font-size: .875rem;
+      padding: .3rem 0; display: flex; align-items: center; gap: .5rem;
+    }
+    .plan-features li i { color: #22c55e; font-size: .85rem; flex-shrink: 0; }
+    .btn-plan {
+      display: block; text-align: center; padding: .6rem;
+      border-radius: var(--r-sm); font-weight: 600; font-size: .9rem;
+      transition: all .2s;
+    }
+    .btn-plan-primary { background: var(--accent); color: #fff; border: none; }
+    .btn-plan-primary:hover { background: var(--accent-dk); }
+    .btn-plan-outline { background: transparent; color: var(--text); border: 1px solid var(--border-lt); }
+    .btn-plan-outline:hover { border-color: #fff; color: #fff; }
+
+    .flash-wrap { max-width: 700px; margin: 1rem auto 0; padding: 0 1.5rem; }
+    .alert { border-radius: var(--r); padding: .6rem 1rem; margin-bottom: .5rem; font-size: .85rem; }
+    .alert-danger  { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.25);  color: #fca5a5; }
+    .alert-success { background: rgba(34,197,94,.1);  border: 1px solid rgba(34,197,94,.25);  color: #86efac; }
+    .alert-warning { background: rgba(234,179,8,.1);  border: 1px solid rgba(234,179,8,.25);  color: #fde047; }
+    .alert-info    { background: rgba(6,182,212,.1);  border: 1px solid rgba(6,182,212,.25);  color: #67e8f9; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">
+    <div class="brand-icon">BW</div>
+    <div class="brand-name">Biz<em>Whiz</em></div>
+  </a>
+  <a class="nav-link" href="{{ url_for('auth.login') }}">A

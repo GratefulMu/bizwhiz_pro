@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}Leads — BizWhiz{% endblock %}
+{% block page_title %}Leads{% endblock %}
+
+{% block topbar_actions %}
+<div class="d-flex gap-2 flex-wrap">
+  <button class="btn btn-secondary btn-sm" onclick="document.getElementById('importModal').classList.add('open')">
+    <i class="bi bi-upload"></i> Import CSV
+  </button>
+  <a href="{{ url_for('export_leads', stage=current_stage, q=search) }}" class="btn btn-secondary btn-sm">
+    <i class="bi bi-download"></i> Export CSV
+  </a>
+  <a href="{{ url_for('leads') }}?search_panel=1" class="btn btn-primary btn-sm">
+    <i class="bi bi-search"></i> Find Leads
+  </a>
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+  .search-panel { margin-bottom: 1rem; }
+  .search-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: .75rem; align-items: end;
+  }
+  @media(max-width: 640px) { .search-grid { grid-template-columns: 1fr; } }
+
+  .filter-bar { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+
+  .bulk-bar {
+    display: none; align-items: center; gap: 1rem;
+    background: rgba(79,123,255,.08);
+    border: 1px solid rgba(79,123,255,.25);
+    border-radius: var(--r);
+    padding: .55rem 1rem;
+    margin-bottom: .875rem;
+  }
+  .bulk-bar.visible { display: flex; }
+  .bulk-count { font-size: .85rem; color: #7fa5ff; font-weight: 600; }
+
+  .lead-name-link { color: #7fa5ff; text-decoration: none; font-weight: 600; }
+  .lead-name-link:hover { text-decoration: underline; }
+
+  .table-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-bottom: .75rem; margin-bottom: 0;
+    border-bottom: 1px solid var(--border);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Search panel -->
+<div class="card search-panel" id="searchPanel"
+     style="{% if not request.args.get('search_panel') %}display:none;{% endif %}">
+  <div class="card-title"><i class="bi bi-geo-alt"></i> Find Nearby Businesses</div>
+  <div class="search-grid">
+    <div>
+      <label class="form-label">Business Type</label>
+      <input type="text" id="s-type" class="form-control" placeholder="e.g. plumber, dentist">
+    </div>
+    <div>
+      <label class="form-label">ZIP Code</label>
+      <input type="text" id="s-zip" class="form-control" placeholder="e.g. 90210">
+    </div>
+    <div>
+      <label class="form-label">Radius (miles)</label>
+      <input type="number" id="s-radius" class="form-control" value="5" min="1" max="50">
+    </div>
+    <div>
+      <button class="btn btn-primary" id="searchBtn" onclick="startSearch()">
+        <i class="bi bi-search"></i> Search
+      </button>
+    </div>
+  </div>
+  <div id="searchStatus" style="margin-top:.75rem;font-size:.84rem;color:var(--muted);display:none;"></div>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+  <form method="GET" action="{{ url_for('leads') }}" style="display:contents;">
+    <input type="text" name="q" value="{{ search }}" placeholder="Search leads…"
+           class="form-control" style="max-width:210px;">
+    <select name="stage" class="form-select" style="max-width:175px;">
+      <option value="">All Stages</option>
+      {% for s in stages %}
+        <option value="{{ s }}" {% if s == current_stage %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+    {% if current_stage or search %}
+      <a href="{{ url_for('leads') }}" class="btn btn-ghost btn-sm">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Bulk action bar -->
+<div class="bulk-bar" id="bulkBar">
+  <span class="bulk-count" id="bulkCount"></span>
+  <button class="btn btn-danger btn-sm" onclick="bulkDelete()">
+    <i class="bi bi-trash"></i> Delete Selected
+  </button>
+  <button class="btn btn-ghost btn-sm ms-auto" onclick="clearSelection()">Cancel</button>
+</div>
+
+<!-- Table -->
+<div class="card" style="padding:0;overflow:hidden;">
+  <div class="table-header" style="padding:.875rem 1.25rem;">
+    <span class="text-muted text-sm" id="resultCount">{{ leads|length }} result(s)</span>
+    <button class="btn btn-danger btn-sm" onclick="deleteAll()">
+      <i class="bi bi-trash3"></i> Delete All
+    </button>
+  </div>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px;padding-left:1.25rem;">
+            <input type="checkbox" id="selectAll" onclick="toggleAll(this)">
+          </th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Phone</th>
+          <th>Emails</th>
+          <th>Stage</th>
+          <th>Added</th>
+          <th style="width:40px;"></th>
+        </tr>
+      </thead>
+      <tbody id="leadsBody">
+        {% for lead in leads %}
+        <tr id="row-{{ lead.id }}">
+          <td style="padding-left:1.25rem;">
+            <input type="checkbox" class="lead-cb" value="{{ lead.id }}" onchange="onCheck()">
+          </td>
+          <td>
+            <a href="{{ url_for('lead_detail', lid=lead.id) }}" class="lead-name-link">{{ lead.name }}</a>
+            {% if lead.address %}
+              <div class="text-muted text-xs">{{ lead.address }}</div>
+            {% endif %}
+          </td>
+          <td class="text-muted text-sm">{{ lead.business_type or '—' }}</td>
+          <td class="text-sm">{{ lead.phone or '—' }}</td>
+          <td class="text-sm" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            {{ lead.emails or '—' }}
+          </td>
+          <td>
+            <span class="stage-pill" style="background:{{ lead.stage|stage_color }};">{{ lead.stage }}</span>
+          </td>
+          <td class="text-muted text-sm">{{ lead.created_at[:10] }}</td>
+          <td>
+            <a href="{{ url_for('lead_detail', lid=lead.id) }}" class="btn btn-ghost btn-sm">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" style="text-align:center;padding:3rem;color:var(--muted);">
+            <i class="bi bi-people" style="font-size:1.75rem;display:block;margin-bottom:.5rem;"></i>
+            No leads yet. Use <strong style="color:var(--text);">Find Leads</strong> to get started.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('importModal').classList.remove('open')">
+      <i class="bi bi-x"></i>
+    </button>
+    <div class="modal-title"><i class="bi bi-upload"></i> Import from CSV</div>
+    <p class="text-muted text-sm mb-3">
+      Columns: <code style="color:var(--accent);">name, website, phone, emails, address, business_type, zip_code, stage</code>.
+      Duplicates are skipped automatically.
+    </p>
+    <form method="POST" action="{{ url_for('import_leads_route') }}" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label class="form-label">CSV File</label>
+        <input type="file" name="csv_file" accept=".csv" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Upload &amp; Import</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function startSearch() {
+  const bt  = document.getElementById('s-type').value.trim();
+  const zip = document.getElementById('s-zip').value.trim();
+  const rad = document.getElementById('s-radius').value || 5;
+  const status = document.getElementById('searchStatus');
+  if (!bt || !zip) { alert('Please enter a business type and ZIP code.'); return; }
+  document.getElementById('searchBtn').disabled = true;
+  status.style.display = 'block';
+  status.textContent = 'Starting search…';
+  fetch('/api/search/start', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({business_type: bt, zip_code: zip, radius: parseFloat(rad)})
+  }).then(r => r.json()).then(d => {
+    if (d.error) { status.textContent = 'Error: ' + d.error; document.getElementById('searchBtn').disabled = false; return; }
+    const poll = setInterval(() => {
+      fetch('/api/search/status').then(r => r.json()).then(d => {
+        if (d.error) { status.textContent = 'Error: ' + d.error; clearInterval(poll); document.getElementById('searchBtn').disabled = false; }
+        else if (d.done) { status.textContent = d.progress; clearInterval(poll); document.getElementById('searchBtn').disabled = false; setTimeout(() => location.reload(), 1200); }
+        else { status.textContent = d.progress; }
+      });
+    }, 1500);
+  });
+}
+
+function toggleAll(master) {
+  document.querySelectorAll('.lead-cb').forEach(cb => cb.checked = master.checked);
+  onCheck();
+}
+function onCheck() {
+  const checked = document.querySelectorAll('.lead-cb:checked');
+  const bar = document.getElementById('bulkBar');
+  if (checked.length > 0) {
+    bar.classList.add('visible');
+    document.getElementById('bulkCount').textContent = checked.length + ' selected';
+  } else {
+    bar.classList.remove('visible');
+  }
+  const all = document.querySelectorAll('.lead-cb');
+  document.getElementById('selectAll').indeterminate = checked.length > 0 && checked.length < all.length;
+  document.getElementById('selectAll').checked = checked.length === all.length && all.length > 0;
+}
+function clearSelection() {
+  document.querySelectorAll('.lead-cb').forEach(cb => cb.checked = false);
+  document.getElementById('selectAll').checked = false;
+  document.getElementById('selectAll').indeterminate = false;
+  document.getElementById('bulkBar').classList.remove('visible');
+}
+function bulkDelete() {
+  const ids = Array.from(document.querySelectorAll('.lead-cb:checked')).map(cb => cb.value);
+  if (!ids.length) return;
+  if (!confirm('Delete ' + ids.length + ' lead(s)?')) return;
+  fetch('/leads/bulk-delete', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ids})
+  }).then(r => r.json()).then(d => {
+    if (d.ok) { ids.forEach(id => document.getElementById('row-' + id)?.remove()); clearSelection(); updateCount(); }
+  });
+}
+function deleteAll() {
+  const total = document.querySelectorAll('.lead-cb').length;
+  if (!total) return;
+  if 

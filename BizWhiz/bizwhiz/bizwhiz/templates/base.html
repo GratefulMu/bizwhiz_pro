@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}BizWhiz{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --dark:#12141d; --darker:#0d0f17; --card-bg:#1a1d2e;
+      --border:#2a2d3e; --text:#c8cde0; --muted:#8890a8;
+      --blue:#0d6efd; --sidebar-w:230px;
+    }
+    body { background:var(--darker); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; display:flex; min-height:100vh; }
+    /* Sidebar */
+    .sidebar {
+      width:var(--sidebar-w); background:var(--dark); border-right:1px solid var(--border);
+      display:flex; flex-direction:column; position:fixed; top:0; left:0; height:100vh; z-index:100;
+    }
+    .sidebar-brand {
+      padding:1.25rem 1.5rem; font-size:1.3rem; font-weight:800; color:#fff;
+      text-decoration:none; border-bottom:1px solid var(--border); display:block;
+    }
+    .sidebar-brand span { color:var(--blue); }
+    .sidebar-nav { flex:1; padding:1rem 0; overflow-y:auto; }
+    .nav-item {
+      display:flex; align-items:center; gap:.75rem;
+      padding:.6rem 1.5rem; color:var(--muted); text-decoration:none;
+      font-size:.9rem; border-radius:0; transition:all .15s;
+    }
+    .nav-item:hover { background:rgba(255,255,255,.04); color:var(--text); }
+    .nav-item.active { background:rgba(13,110,253,.15); color:#5c9bff; border-right:2px solid var(--blue); }
+    .nav-item i { font-size:1rem; width:18px; text-align:center; }
+    .sidebar-footer { padding:1rem 1.5rem; border-top:1px solid var(--border); }
+    .user-pill {
+      display:flex; align-items:center; gap:.6rem;
+      font-size:.8rem; color:var(--muted); margin-bottom:.5rem;
+    }
+    .user-pill .avatar {
+      width:28px; height:28px; background:var(--blue); border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:.75rem; color:#fff; flex-shrink:0;
+    }
+    .btn-logout {
+      display:flex; align-items:center; gap:.5rem;
+      color:var(--muted); text-decoration:none; font-size:.8rem;
+      padding:.35rem 0; transition:color .15s;
+    }
+    .btn-logout:hover { color:#dc3545; }
+    /* Main */
+    .main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-width:0; }
+    .topbar {
+      background:var(--dark); border-bottom:1px solid var(--border);
+      padding:.85rem 1.75rem; display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:50;
+    }
+    .topbar-title { font-size:1.1rem; font-weight:700; color:#fff; }
+    .content { padding:1.75rem; flex:1; }
+    /* Cards */
+    .card {
+      background:var(--card-bg); border:1px solid var(--border);
+      border-radius:12px; padding:1.25rem;
+    }
+    /* Alerts */
+    .alert { border-radius:8px; padding:.65rem 1rem; margin-bottom:1rem; font-size:.875rem; }
+    .alert-danger  { background:rgba(220,53,69,.15);  border:1px solid rgba(220,53,69,.3);  color:#f4b8be; }
+    .alert-success { background:rgba(25,135,84,.15);  border:1px solid rgba(25,135,84,.3);  color:#a3d9a5; }
+    .alert-warning { background:rgba(255,193,7,.15);  border:1px solid rgba(255,193,7,.3);  color:#ffe083; }
+    .alert-info    { background:rgba(13,202,240,.15); border:1px solid rgba(13,202,240,.3); color:#9eeaf9; }
+    /* Buttons */
+    .btn {
+      display:inline-flex; align-items:center; gap:.4rem;
+      padding:.45rem .9rem; border-radius:8px; font-size:.875rem;
+      font-weight:500; text-decoration:none; border:none; cursor:pointer; transition:all .15s;
+    }
+    .btn-primary   { background:var(--blue); color:#fff; }
+    .btn-primary:hover { background:#0b5ed7; }
+    .btn-secondary { background:rgba(255,255,255,.07); color:var(--text); border:1px solid var(--border); }
+    .btn-secondary:hover { background:rgba(255,255,255,.12); }
+    .btn-danger    { background:rgba(220,53,69,.15); color:#f4b8be; border:1px solid rgba(220,53,69,.3); }
+    .btn-danger:hover { background:rgba(220,53,69,.3); }
+    .btn-sm { padding:.3rem .65rem; font-size:.8rem; }
+    /* Tables */
+    table { width:100%; border-collapse:collapse; }
+    th { color:var(--muted); font-size:.8rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; padding:.6rem 1rem; text-align:left; border-bottom:1px solid var(--border); }
+    td { padding:.75rem 1rem; border-bottom:1px solid var(--border); font-size:.9rem; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(255,255,255,.02); }
+    /* Form controls */
+    .form-control, .form-select {
+      background:var(--darker); border:1px solid var(--border); border-radius:8px;
+      color:var(--text); padding:.5rem .85rem; font-size:.9rem; outline:none; width:100%;
+    }
+    .form-control:focus, .form-select:focus { border-color:var(--blue); }
+    .form-control::placeholder { color:#4a4f6a; }
+    .form-label { font-size:.875rem; color:var(--muted); margin-bottom:.35rem; display:block; }
+    /* Badge / stage pill */
+    .stage-pill {
+      display:inline-block; padding:.2rem .6rem; border-radius:20px;
+      font-size:.75rem; font-weight:600; color:#fff;
+    }
+    /* Utilities */
+    .text-muted { color:var(--muted); }
+    .text-sm { font-size:.8rem; }
+    .mb-1 { margin-bottom:.25rem; }
+    .mb-2 { margin-bottom:.5rem; }
+    .mb-3 { margin-bottom:1rem; }
+    .mb-4 { margin-bottom:1.5rem; }
+    .mt-1 { margin-top:.25rem; }
+    .mt-2 { margin-top:.5rem; }
+    .mt-3 { margin-top:1rem; }
+    .gap-2 { gap:.5rem; }
+    .d-flex { display:flex; }
+    .align-items-center { align-items:center; }
+    .justify-content-between { justify-content:space-between; }
+    .flex-wrap { flex-wrap:wrap; }
+    .ms-auto { margin-left:auto; }
+    .w-100 { width:100%; }
+    /* Modal */
+    .modal-overlay {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,.7);
+      z-index:1000; align-items:center; justify-content:center;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal-box {
+      background:var(--card-bg); border:1px solid var(--border); border-radius:16px;
+      padding:2rem; width:100%; max-width:480px; position:relative;
+    }
+    .modal-title { font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:1rem; }
+    .modal-close {
+      position:absolute; top:1rem; right:1rem; background:none; border:none;
+      color:var(--muted); cursor:pointer; font-size:1.2rem;
+    }
+    .modal-close:hover { color:#fff; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<aside class="sidebar">
+  <a class="sidebar-brand" href="{{ url_for('dashboard') }}">Biz<span>Whiz</span></a>
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint=='dashboard' %}active{% endif %}">
+      <i class="bi bi-speedometer2"></i> Dashboard
+    </a>
+    <a href="{{ url_for('leads') }}" class="nav-item {% if request.endpoint in ['leads','lead_detail'] %}active{% endif %}">
+      <i class="bi bi-people"></i> Leads
+    </a>
+    <a href="{{ url_for('pipeline') }}" class="nav-item {% if request.endpoint=='pipeline' %}active{% endif %}">
+      <i class="bi bi-kanban"></i> Pipeline
+    </a>
+    <a href="{{ url_for('email_templates') }}" class="nav-item {% if request.endpoint=='email_templates' %}active{% endif %}">
+      <i class="bi bi-envelope-paper"></i> Templates
+    </a>
+    <a href="{{ url_for('settings') }}" class="nav-item {% if request.endpoint=='settings' %}active{% endif %}">
+      <i class="bi bi-gear"></i> Settings
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-pill">
+      <div class="avatar">{{ current_user.full_name[0].upper() }}</div>
+      <div>
+        <div style="color:#fff;font-weight:600;">{{ current_user.full_name }}</div>
+        <div>{{ current_user.plan|capitalize }} plan</div>
+      </div>
+    </div>
+    <a href="{{ url_for('auth.logout') }}" class="btn-logout">
+      <i class="bi bi-box-arrow-right"></i> Sign out
+    </a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+    <div>{% block topbar_actions %}{% endblock %}</div>
+  </div>
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="alert alert-{{ cat }}">{{ msg|safe }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+</div>
+{% block scripts %}{% endblock %}
+</body>
+</html>

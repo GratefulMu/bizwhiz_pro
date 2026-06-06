@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Choose a Plan | BizWhiz</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --dark:#12141d; --darker:#0d0f17; --card-bg:#1a1d2e;
+      --border:#2a2d3e; --text:#c8cde0; --muted:#8890a8; --blue:#0d6efd;
+    }
+    body { background:var(--darker); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; min-height:100vh; }
+    nav {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1rem 2rem; border-bottom:1px solid var(--border);
+    }
+    .brand { font-size:1.4rem; font-weight:800; color:#fff; text-decoration:none; }
+    .brand span { color:var(--blue); }
+    .nav-link { color:var(--muted); text-decoration:none; font-size:.9rem; }
+    .nav-link:hover { color:#fff; }
+    .page-header { text-align:center; padding:3rem 1rem 2rem; }
+    .page-header h1 { font-size:2rem; font-weight:800; color:#fff; margin-bottom:.5rem; }
+    .page-header p { color:var(--muted); font-size:1rem; }
+    .plans { display:flex; gap:1.5rem; justify-content:center; flex-wrap:wrap; padding:0 1.5rem 4rem; }
+    .plan-card {
+      background:var(--card-bg); border:1px solid var(--border); border-radius:16px;
+      padding:2rem; width:300px; display:flex; flex-direction:column; position:relative;
+    }
+    .plan-card.featured { border-color:var(--blue); box-shadow:0 0 0 1px var(--blue); }
+    .badge {
+      position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+      background:var(--blue); color:#fff; font-size:.75rem; font-weight:700;
+      padding:.25rem .75rem; border-radius:20px; white-space:nowrap;
+    }
+    .plan-name { font-size:1.1rem; font-weight:700; color:#fff; margin-bottom:.25rem; }
+    .plan-price { font-size:2.5rem; font-weight:800; color:#fff; margin:.5rem 0; }
+    .plan-price span { font-size:1rem; color:var(--muted); font-weight:400; }
+    .plan-features { list-style:none; margin:1.25rem 0 2rem; flex:1; }
+    .plan-features li { color:var(--muted); font-size:.9rem; padding:.3rem 0; display:flex; align-items:center; gap:.5rem; }
+    .plan-features li i { color:#198754; }
+    .btn-plan {
+      display:block; text-align:center; padding:.65rem; border-radius:8px;
+      font-weight:600; font-size:1rem; text-decoration:none; transition:all .2s;
+    }
+    .btn-plan-primary { background:var(--blue); color:#fff; border:none; }
+    .btn-plan-primary:hover { background:#0b5ed7; }
+    .btn-plan-outline { background:transparent; color:var(--text); border:1px solid var(--border); }
+    .btn-plan-outline:hover { border-color:#fff; color:#fff; }
+    .flash-wrap { max-width:700px; margin:1rem auto 0; padding:0 1rem; }
+    .alert { border-radius:8px; padding:.65rem 1rem; margin-bottom:.5rem; font-size:.875rem; }
+    .alert-danger  { background:rgba(220,53,69,.15); border:1px solid rgba(220,53,69,.3); color:#f4b8be; }
+    .alert-success { background:rgba(25,135,84,.15); border:1px solid rgba(25,135,84,.3); color:#a3d9a5; }
+    .alert-warning { background:rgba(255,193,7,.15); border:1px solid rgba(255,193,7,.3); color:#ffe083; }
+    .alert-info    { background:rgba(13,202,240,.15); border:1px solid rgba(13,202,240,.3); color:#9eeaf9; }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="brand" href="/">Biz<span>Whiz</span></a>
+  <a class="nav-link" href="{{ url_for('auth.login') }}">Already have an account? Sign in</a>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }}">{{ msg|safe }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="page-header">
+  <h1>Choose your plan</h1>
+  <p>Start finding leads today. No credit card required to get started.</p>
+</div>
+
+<div class="plans">
+  {% for key, plan in plans.items() %}
+  <div class="plan-card {% if plan.badge %}featured{% endif %}">
+    {% if plan.badge %}<div class="badge">{{ plan.badge }}</div>{% endif %}
+    <div class="plan-name">{{ plan.name }}</div>
+    <div class="plan-price">${{ plan.price }}<span>/mo</span></div>
+    <ul class="plan-features">
+      <li><i class="bi bi-check-lg"></i> {{ plan.leads }} leads/month</li>
+      <li><i class="bi bi-check-lg"></i> Up to {{ plan.seats }} seat{% if plan.seats > 1 %}s{% endif %}</li>
+      <li><i class="bi bi-check-lg"></i> Email outreach tools</li>
+      <li><i class="bi bi-check-lg"></i> CSV import &amp; export</li>
+      <li><i class="bi bi-check-lg"></i> Pipeline management</li>
+    </ul>
+    <a href="{{ url_for('auth.register', plan=key) }}"
+       class="btn-plan {% if plan.badge %}btn-plan-primary{% else %}btn-plan-outline{% endif %}">
+      Get Started
+    </a>
+  </div>
+  {% endfor %}
+</div>
+</body>
+</html>
